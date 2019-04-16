@@ -94,21 +94,19 @@ h1.bigtitle {
     margin-bottom: -.25em;
     margin-top: 0;
     padding-top: 0;
-    font-size: 6em;
+    font-size: 5em;
 
 }
 
-h1.bigtitle span.blue {
+h1.bigtitle {
     
-    font-size: 75%;
-    color: #0074d9;
+    font-size: 100%;
 
 }
 
-h1.bigtitle span.red {
+h1.bigtitle {
 
-    font-size: 75%;
-    color: #ff4136;
+    font-size: 100%;
 
 }
 
