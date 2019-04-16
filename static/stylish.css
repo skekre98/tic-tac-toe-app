@@ -23,21 +23,24 @@
 
 }
 
+#hp  {
+float: right;    
+ margin: 0 0 0 15px;
+}
+
 .game-piece-red {
     
     background-color: #ff4136;
     height:100%;
     width:100%;
-    z-index:99;
     
 }
 
 .game-piece-blue {
     
-    background-color: #0074d9;
+    background-color: #111111;
     height:100%;
     width:100%;
-    z-index:99;
     
 }
 
@@ -80,6 +83,7 @@
     margin-right: auto;
 
 }
+
 
 .container {
 
