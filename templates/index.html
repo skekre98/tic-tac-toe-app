@@ -40,12 +40,12 @@
       </table>
       <div class="top-padded">
 	{% if win == 1 %}
-	Red Wins! &nbsp
-	{% elif win == 2 %}
-	Blue Wins! &nbsp
+	O Wins! &nbsp
+	{% elif win == -1 %}
+	X Wins! &nbsp
 	{% endif %}
 
-	{% if win > 0 or turn >= 9%}
+	{% if win == 0 or turn >= 9%}
 	<a href="setup" id="play-again">Play again?</a>
 	{% else %}
 	<a href="restart">Restart</a>

@@ -1,12 +1,21 @@
 from flask import Flask, session, render_template, request, redirect, url_for
-from random import randint
+from random import randint,shuffle
+import copy
 
 ### Globals ###
 
 app = Flask(__name__)
 app.secret_key = '9*TGIKi7tggkuyUPJKdY%W^$WKLHOyjv,liIUFL>N>'
 
-### Service / Utility Methods ###
+class Move(object):
+    row = 0
+    column = 0
+    score = 0
+
+    def __init__(self,row,column,score):
+        self.row = row
+        self.column = column
+        self.score = score
 
 def parsenum (s):
     try:
@@ -14,103 +23,95 @@ def parsenum (s):
     except ValueError:
         return float(s)
 
-def ttt_logic(grid, turn, color):
-    rotate_grid = [[grid[0][x],grid[1][x],grid[2][x]] \
-                       for x,l in enumerate(grid)]
-    op_color = abs(color-3)
-        
-    # Handle end-game
-    if turn == 9:
-        for r,l in enumerate(grid):
-            for c,i in enumerate(l):
-                if i == 0:
-                    return r,c
-    # Turn 1 logic
-    if turn == 1:
-        non_d = randint(0,4)
-        options = [(0,0),(0,2),(2,0),(2,2),(1,1)]
-        return options[non_d]
+# Checks if there are still any legal moves remaining
+def is_Full(board):
+    for row in board:
+        for col in row:
+            if(col == 0):
+                return False
+    return True
 
-    # Turn 2 logic
-    if turn == 2 and grid[1][1] == 0:
-        return 1,1
-    elif turn == 2 and grid[1][1] > 0:
-        non_d = randint(0,3)
-        options = [(0,0),(0,2),(2,0),(2,2)]
-        return options[non_d]
-    
-    # Turn 3 logic
-    if turn == 3 and grid[1][1] == color:
-        non_d = randint(0,3)
-        options = [(0,1),(1,0),(1,2),(2,1)]
-        return options[non_d]
-    elif turn == 3:
-        r = 0
-        c = 0
-        flip = randint(0,1)
-        options = [(0,0),(0,2),(2,0),(2,2)]
-        while True:
-            non_d = randint(0,3)
-            r,c = options[non_d]
-            if grid[r][c] == color:
-                break
-        return abs(r-2*flip),abs(c-2*abs(flip-1))
+def sort_Moves(list):
+    for i in range(0, len(list) - 1):
+        for j in range(i, len(list)):
+            if list[i].score < list[j].score:
+                temp = list[i]
+                list[i] = list[j]
+                list[j] = temp
 
-    # All subsequent rounds
-    if turn > 3:
-        # Play to win
-        if [color,color,0] in grid:
-            print "1"
-            return grid.index([color,color,0]),2
-        elif [color,color,0] in rotate_grid:
-            print "2"
-            return 2,rotate_grid.index([color,color,0])
-        if [color,0,color] in grid:
-            print "3"
-            return grid.index([color,0,color]),1
-        elif [color,0,color] in rotate_grid:
-            print "4"
-            return 1,rotate_grid.index([color,0,color])
-        if [0,color,color] in grid:
-            print "5"
-            return grid.index([0,color,color]),0
-        elif [0,color,color] in rotate_grid:
-            print "6"
-            return 0,rotate_grid.index([0,color,color])
+# This method will return the state of the board
+# -1 ~ X won
+# 0 ~ Draw
+# 1 ~ 0 won
+# 100 ~ Incomplete
+def get_Result(board):
+    if (
+    (board[0][0] == 1 and board[0][1] == 1 and board[0][2] == 1) or
+    (board[1][0] == 1 and board[1][1] == 1 and board[1][2] == 1) or
+    (board[2][0] == 1 and board[2][1] == 1 and board[2][2] == 1) or
+    (board[0][0] == 1 and board[1][0] == 1 and board[2][0] == 1) or
+    (board[0][1] == 1 and board[1][1] == 1 and board[2][1] == 1) or
+    (board[0][2] == 1 and board[1][2] == 1 and board[2][2] == 1) or
+    (board[0][0] == 1 and board[1][1] == 1 and board[2][2] == 1) or
+    (board[0][2] == 1 and board[1][1] == 1 and board[2][0] == 1)  
+    ): return -1
+    elif (
+    (board[0][0] == 2 and board[0][1] == 2 and board[0][2] == 2) or
+    (board[1][0] == 2 and board[1][1] == 2 and board[1][2] == 2) or
+    (board[2][0] == 2 and board[2][1] == 2 and board[2][2] == 2) or
+    (board[0][0] == 2 and board[1][0] == 2 and board[2][0] == 2) or
+    (board[0][1] == 2 and board[1][1] == 2 and board[2][1] == 2) or
+    (board[0][2] == 2 and board[1][2] == 2 and board[2][2] == 2) or
+    (board[0][0] == 2 and board[1][1] == 2 and board[2][2] == 2) or
+    (board[0][2] == 2 and board[1][1] == 2 and board[2][0] == 2)
+    ): return 1
+    elif is_Full(board): return 0
+    else: return 100 
 
-        # Play to block
-        if [op_color,op_color,0] in grid:
-            print "7"
-            return grid.index([op_color,op_color,0]),2
-        elif[op_color,op_color,0] in rotate_grid:
-           print "8" 
-           return 2,rotate_grid.index([op_color,op_color,0])
-        if [op_color,0,op_color] in grid:
-            print "9"
-            return grid.index([op_color,0,op_color]),1
-        elif[op_color,0,op_color] in rotate_grid:
-            print "10"
-            return 1,rotate_grid.index([op_color,0,op_color])
-        if [0,op_color,op_color] in grid:
-            print "11"
-            return grid.index([0,op_color,op_color]),0
-        elif[0,op_color,op_color] in rotate_grid:
-            print "12"
-            return 0,rotate_grid.index([0,op_color,op_color])
+# This method will return the best move for the computer
+# X=1
+# O=2
+def get_Best_Move(brd, turn):
+    available_Moves = [] # A list of available moves for the computer to make
+    for i in range(3):
+        for j in range(3):
+            if (brd[i][j] == 0):
+                available_Moves.append(Move(i,j,0))
+
+    if len(available_Moves) == 0: #board is full
+        return 0
+
+    target_Moves = []
+    for move in available_Moves:
+        b = copy.deepcopy(brd) # Makes copy of current game state
+        if (turn == 1):
+            b[move.row][move.column] = 1
+        else:
+            b[move.row][move.column] = 2
+
+        result = get_Result(b)
+        score = 0
+        if result == 0:
+            score == 0
+        elif (result == -1 and turn == 1) or (result == 1 and turn == 2):
+            score = 1
+        else:
+            other = 1
+            if turn == 1:
+                other = 2
+
+            nextMove = get_Best_Move(b, other)
+            score = -1*(nextMove.score)
+
+        move.score = score
+        if move.score == 1:
+            return move
+        target_Moves.append(move)
 
 
-    # Weird how turn 4 is addressed here, but it is an edge case
-    if turn == 4 and \
-       ((grid[0][0] == op_color and grid[2][2] == op_color) or \
-        (grid[0][2] == op_color and grid[2][0] == op_color)):
-        print "Symmetry catch"
-        non_d = randint(0,3)
-        options = [(0,1),(1,0),(1,2),(2,1)]
-        return options[non_d]
-
-    row = randint(0,2)
-    column = randint(0,2)
-    return row,column
+    shuffle(target_Moves)
+    sort_Moves(target_Moves)
+    return target_Moves[0]
 
 
 def compute_win(grid):
@@ -162,12 +163,11 @@ def index():
         session['turn'] += 1 
         while True:
 
-            c_row,c_column = ttt_logic(session['grid'], 
-                                       session['turn'], 
+            bestMove = get_Best_Move(session['grid'],  
                                        abs(session['color']-3))
 
-            if session['grid'][c_row][c_column] == 0:
-                session['grid'][c_row][c_column] = abs(session['color']-3)
+            if session['grid'][bestMove.row][bestMove.column] == 0:
+                session['grid'][bestMove.row][bestMove.column] = abs(session['color']-3)
                 break
 
     return render_template('index.html', 
@@ -177,8 +177,9 @@ def index():
 
 @app.route("/", methods=['POST'])
 def update():
-    session['win'] = compute_win(session['grid']);
-    if session['win'] == 0:
+    session['win'] = get_Result(session['grid']);
+    print(session['win'])
+    if session['win'] == 100:
         # perform player move
         session['turn'] += 1
         p_row = parsenum(request.form['play'].split(',')[0])
@@ -191,15 +192,14 @@ def update():
             session['turn'] += 1
             while True and session['turn'] < 10:
                 
-                c_row,c_column = ttt_logic(session['grid'], 
-                                           session['turn'], 
-                                           abs(session['color']-3))
+                bestMove = get_Best_Move(session['grid'],  
+                                       abs(session['color']-3))
 
-                if session['grid'][c_row][c_column] == 0:
-                    session['grid'][c_row][c_column] = abs(session['color']-3)
+                if session['grid'][bestMove.row][bestMove.column] == 0:
+                    session['grid'][bestMove.row][bestMove.column] = abs(session['color']-3)
                     break
 
-    session['win'] = compute_win(session['grid']);
+    session['win'] = get_Result(session['grid']);
     return render_template('index.html', 
                            grid=session['grid'],
                            turn = session['turn'],
