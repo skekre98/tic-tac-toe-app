@@ -8,7 +8,7 @@
 
 #game-grid td {
 
-    border: 1em solid #DDDDDD;
+    border: 1em solid #FFFFFF;
     padding: 0;
     height: 8em;
     width: 8em;
@@ -29,15 +29,20 @@ float: right;
 }
 
 .game-piece-red {
-    
     background-color: #ff4136;
     height:100%;
     width:100%;
     
 }
 
-.game-piece-blue {
+.game-piece-black {
+    background-color: #111111;
+    height:100%;
+    width:100%;
     
+}
+
+.game-piece-blue {
     background-color: #111111;
     height:100%;
     width:100%;
