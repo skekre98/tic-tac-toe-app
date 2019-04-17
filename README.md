@@ -13,3 +13,4 @@ Once Flask has been successfully installed clone the respository onto your local
 ```
 FLASK_APP=hello.py flask run
 ```
+The application will begin running on your localhost and you should be met with a menu to select color(Red, Blue) and whether you want to move first or second. After that, you will be met with an unbeatable Tic-Tac-Toe computer! 
