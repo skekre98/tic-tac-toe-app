@@ -40,9 +40,9 @@ def sort_Moves(list):
                 list[j] = temp
 
 # This method will return the state of the board
-# -1 ~ X won
+# -1 ~ Red won
 # 0 ~ Draw
-# 1 ~ 0 won
+# 1 ~ Blue won
 # 100 ~ Incomplete
 def get_Result(board):
     if (
